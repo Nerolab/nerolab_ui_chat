@@ -1,7 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart';
-import 'package:flutter_link_previewer/flutter_link_previewer.dart';
+import 'package:nerolab_ui_chat/widgets/image_view.dart';
 
 import 'package:nerolab_ui_chat/widgets/nero_avatar.dart';
 
@@ -44,6 +46,14 @@ class _MyHomePageState extends State<MyHomePage> {
         'https://medium.com/',
       ];
 
+  final _scrollController = ScrollController();
+
+  // Define the function that scroll to an item
+  void _scrollToIndex(index) {
+    _scrollController.animateTo(index,
+        duration: const Duration(milliseconds: 600), curve: Curves.easeIn);
+  }
+
   @override
   Widget build(BuildContext context) {
     const imageUrl = 'https://randomuser.me/api/portraits/women/60.jpg';
@@ -54,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: ListView(
+        controller: _scrollController,
         padding: const EdgeInsets.all(16),
         children: [
           Padding(
@@ -118,6 +129,77 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
           ),
           const SizedBox(height: 8),
+          Row(
+            children: [
+              const NeroAvatar(
+                radius: 56,
+                name: 'Yin Min',
+                image: NetworkImage(imageUrl),
+                userStatus: UserStatus.online,
+                storyStatus: StoryStatus.off,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Athalia Putri',
+                            style:
+                                Theme.of(context).textTheme.subtitle1!.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                          ),
+                        ),
+                        Text(
+                          'Today',
+                          style: Theme.of(context).textTheme.caption,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Good morning, did you sleep well?',
+                            style: Theme.of(context).textTheme.bodyText2,
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .indicatorColor
+                                .withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(40),
+                          ),
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
+                              child: Text(
+                                '1',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption!
+                                    .copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+          const SizedBox(height: 8),
           const NeroChatBubble(
             name: 'Devo Mizuhara',
             message: 'But don’t worry cause we are all learning here',
@@ -164,19 +246,23 @@ class _MyHomePageState extends State<MyHomePage> {
             time: '16.46',
             userType: UserType.reciever,
             attachment: 'Brand Academy Slide Deck.pptx',
-            isRead: true,
+            isRead: false,
           ),
-          LinkPreview(
-            enableAnimation: true,
-            onPreviewDataFetched: (data) {
-              setState(() {
-                datas = {...datas, urls[0]: data};
-              });
+          const NeroChatBubble(
+            name: 'Nero',
+            time: '18.09',
+            userType: UserType.sender,
+            isRead: true,
+            image: NetworkImage(
+              'https://cdn.dribbble.com/users/2286722/screenshots/15925605/media/66645b6955f6a9916ab0b50a90c3e3bf.png?compress=1&resize=1200x900&vertical=top',
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _scrollToIndex(4);
             },
-            text: urls[0],
-            width: MediaQuery.of(context).size.width,
-            previewData: datas[urls[0]],
-          )
+            child: const Text('2'),
+          ),
         ],
       ),
     );
@@ -205,6 +291,7 @@ class NeroChatBubble extends StatelessWidget {
     required this.isRead,
     this.reply,
     this.attachment,
+    this.image,
   }) : super(key: key);
 
   final String name;
@@ -214,6 +301,7 @@ class NeroChatBubble extends StatelessWidget {
   final bool isRead;
   final ReplyMessage? reply;
   final String? attachment;
+  final ImageProvider? image;
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +318,7 @@ class NeroChatBubble extends StatelessWidget {
             decoration: BoxDecoration(
               color: userType == UserType.sender
                   ? Colors.white
-                  : const Color(0xFF002DE3),
+                  : Theme.of(context).primaryColor,
               borderRadius: BorderRadiusDirectional.only(
                 topStart: const Radius.circular(16),
                 topEnd: const Radius.circular(16),
@@ -259,7 +347,7 @@ class NeroChatBubble extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: InkWell(
-                        onTap: () => print('object'),
+                        onTap: () => log('object'),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Row(
@@ -298,6 +386,28 @@ class NeroChatBubble extends StatelessWidget {
                     message: 'But don’t worry cause we are all learning here',
                     userType: userType,
                   ),
+                if (image != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageView(
+                              imageProvider: image!,
+                            ),
+                            fullscreenDialog: true,
+                          ),
+                        ),
+                        child: Image(
+                          image: image!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
                 if (message != null) _buildMessage(context),
                 Row(
                   mainAxisAlignment: userType == UserType.sender
@@ -313,7 +423,7 @@ class NeroChatBubble extends StatelessWidget {
                                 : const Color(0xFFADB5BD),
                           ),
                     ),
-                    if (userType == UserType.reciever && !isRead)
+                    if (userType == UserType.reciever && isRead)
                       Text(
                         ' · Read',
                         style: Theme.of(context).textTheme.caption!.copyWith(
@@ -354,7 +464,7 @@ class NeroChatBubble extends StatelessWidget {
         style: Theme.of(context).textTheme.caption!.copyWith(
               color: userType == UserType.reciever
                   ? Colors.white
-                  : const Color(0xFF001A83),
+                  : Theme.of(context).primaryColor,
               fontWeight: FontWeight.w600,
             ),
       ),
@@ -392,7 +502,7 @@ class NeroChatReply extends StatelessWidget {
               decoration: BoxDecoration(
                 color: userType == UserType.reciever
                     ? Colors.white
-                    : const Color(0xFF002DE3),
+                    : Theme.of(context).primaryColor,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(4),
                   bottomLeft: Radius.circular(4),
@@ -433,7 +543,7 @@ class NeroChatReply extends StatelessWidget {
       style: Theme.of(context).textTheme.caption!.copyWith(
             color: userType == UserType.reciever
                 ? Colors.white
-                : const Color(0xFF001A83),
+                : Theme.of(context).primaryColor,
             fontWeight: FontWeight.w600,
           ),
     );

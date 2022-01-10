@@ -32,7 +32,7 @@ class NeroAvatar extends StatelessWidget {
             border: storyStatus == StoryStatus.on
                 ? Border.all(
                     width: 2 * radius! / 56,
-                    color: const Color(0xFF879FFF),
+                    color: Theme.of(context).indicatorColor,
                   )
                 : null,
           ),
@@ -41,7 +41,7 @@ class NeroAvatar extends StatelessWidget {
           height: radius! * 48 / 56,
           width: radius! * 48 / 56,
           decoration: BoxDecoration(
-            color: const Color(0xFF166FF6),
+            color: Theme.of(context).primaryColor,
             borderRadius: BorderRadius.circular(16 * radius! / 56),
             image: image != null
                 ? DecorationImage(
